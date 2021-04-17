@@ -11,13 +11,12 @@ import {
   ScrollView,
   TouchableOpacity,
   Linking,
-  Alert,
 } from 'react-native';
 import Modal from 'react-native-modal';
 import {Icon} from 'react-native-elements';
-import SoundPlayer from 'react-native-sound-player';
-import {useTheme} from '@react-navigation/native';
+import {AudioPlayer} from 'react-native-simple-audio-player';
 
+import {useTheme} from '@react-navigation/native';
 import {getUrl} from '../storage/storage';
 
 const genre = [
@@ -35,28 +34,30 @@ const genre = [
   },
 ];
 
+const type = {
+  Classical: 'classical',
+  HipHop: 'hiphop',
+  Jazz: 'jazz',
+};
+
 const HomeScreen = ({navigation}) => {
   const theme = useTheme();
   const [isLoading, setIsLoading] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [url, setUrl] = useState('');
+  const [music, setMusic] = useState('');
 
   const callback = audioUrl => {
+    setUrl(audioUrl);
     setIsLoading(false);
-    console.log('in call');
-    console.log('url:', audioUrl);
-    try {
-      SoundPlayer.loadUrl(url);
-    } catch {
-      e => console.log('Error', e);
-    }
   };
 
-  const onPress = async () => {
+  const onPress = async item => {
+    setMusic(item);
     setIsLoading(true);
     setIsVisible(true);
-    const audioUrl = await getUrl('classical/classical1.mid');
-    setUrl(audioUrl);
+    const filePath = type[item];
+    const audioUrl = await getUrl(filePath);
     await setTimeout(() => callback(audioUrl), 5000);
   };
 
@@ -67,10 +68,20 @@ const HomeScreen = ({navigation}) => {
       <StatusBar barStyle={theme.dark ? 'light-content' : 'dark-content'} />
       <Text style={styles.headerTitle}>Pick a Genre</Text>
       <View style={styles.header} />
+      {url !== "" && (
+        <TouchableOpacity
+          onPress={async () => await Linking.openURL(url)}
+          style={[styles.box, styles.shadow]}>
+          <Text style={{fontSize: 16, fontWeight: '600'}}>
+            Download the last played song
+          </Text>
+          <Icon name="download" type="feather" />
+        </TouchableOpacity>
+      )}
       {genre.map((item, index) => {
         return (
           <TouchableOpacity
-            onPress={onPress}
+            onPress={() => onPress(item.name)}
             key={`${index}`}
             style={[styles.cardContainer, styles.shadow]}>
             <Image
@@ -99,6 +110,13 @@ const HomeScreen = ({navigation}) => {
         isVisible={isVisible}
         style={{alignItems: 'center', justifyContent: 'center'}}>
         <View style={styles.modalContainer}>
+          {!isLoading && (
+            <TouchableOpacity
+              onPress={() => setIsVisible(false)}
+              style={{alignSelf: 'flex-end'}}>
+              <Icon name="close" type="material" size={24} />
+            </TouchableOpacity>
+          )}
           <Text style={{fontSize: 20, fontWeight: '700'}}>
             {isLoading ? 'Generating Audio' : 'Enjoy!'}
           </Text>
@@ -115,8 +133,14 @@ const HomeScreen = ({navigation}) => {
             </>
           ) : (
             <>
-              <View>
-                <Text>Hi</Text>
+              <View style={styles.player}>
+                <Image
+                  source={require('../../assets/album-art.png')}
+                  style={{width: 200, height: 200, alignSelf: 'center'}}
+                  resizeMode="contain"
+                />
+                <Text style={styles.playerText}>{music}</Text>
+                <AudioPlayer url={url} />
               </View>
             </>
           )}
@@ -132,6 +156,33 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     paddingBottom: 16,
+  },
+  box: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    width: '91%',
+    borderWidth: 2,
+    borderRadius: 16,
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    borderColor: '#075E5475',
+  },
+  player: {
+    borderWidth: 1,
+    backgroundColor: '#075E5475',
+    justifyContent: 'center',
+    marginTop: 16,
+    paddingBottom: 12,
+    borderRadius: 24,
+  },
+  playerText: {
+    fontSize: 28,
+    fontWeight: '600',
+    color: '#fff',
+    textAlign: 'center',
+    paddingBottom: 32,
+    marginTop: -16,
   },
   header: {
     width: '91%',
@@ -178,7 +229,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 16,
-    width: '60%',
+    minWidth: '60%',
   },
   mask: {
     width: '100%',
