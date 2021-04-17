@@ -1,10 +1,8 @@
-import React from 'react';
+import React, {useContext} from 'react';
 import {
   View,
   Text,
-  Button,
   TouchableOpacity,
-  Dimensions,
   TextInput,
   Platform,
   StyleSheet,
@@ -16,10 +14,11 @@ import * as Animatable from 'react-native-animatable';
 import LinearGradient from 'react-native-linear-gradient';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
+import {AuthContext} from '../navigation/AuthProvider';
 
 const SignInScreen = ({navigation}) => {
   const [data, setData] = React.useState({
-    username: '',
+    email: '',
     password: '',
     confirm_password: '',
     check_textInputChange: false,
@@ -27,17 +26,19 @@ const SignInScreen = ({navigation}) => {
     confirm_secureTextEntry: true,
   });
 
+  const {register} = useContext(AuthContext);
+
   const textInputChange = val => {
     if (val.length !== 0) {
       setData({
         ...data,
-        username: val,
+        email: val,
         check_textInputChange: true,
       });
     } else {
       setData({
         ...data,
-        username: val,
+        email: val,
         check_textInputChange: false,
       });
     }
@@ -79,12 +80,12 @@ const SignInScreen = ({navigation}) => {
       </View>
       <Animatable.View animation="fadeInUpBig" style={styles.footer}>
         <ScrollView showsVerticalScrollIndicator={false}>
-          <Text style={styles.text_footer}>Username</Text>
+          <Text style={styles.text_footer}>E-mail</Text>
           <View style={styles.action}>
             <FontAwesome name="user-o" color="#05375a" size={20} />
             <TextInput
-              value={data.username}
-              placeholder="Your Username"
+              value={data.email}
+              placeholder="Your E-mail"
               style={styles.textInput}
               autoCapitalize="none"
               onChangeText={val => textInputChange(val)}
@@ -177,6 +178,8 @@ const SignInScreen = ({navigation}) => {
                   });
                   Alert.alert(`Password didn't match`);
                 }
+
+                register(data.email, data.password);
               }}>
               <LinearGradient
                 colors={['#08d4c4', '#01ab9d']}

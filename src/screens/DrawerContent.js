@@ -1,41 +1,32 @@
-import React from 'react';
+import React, {useContext} from 'react';
+import {Avatar, Title, Caption, Drawer} from 'react-native-paper';
 import {View, StyleSheet, Linking} from 'react-native';
-import {
-  useTheme,
-  Avatar,
-  Title,
-  Caption,
-  Drawer,
-  Text,
-  TouchableRipple,
-  Switch,
-} from 'react-native-paper';
 import {DrawerContentScrollView, DrawerItem} from '@react-navigation/drawer';
 import {Icon} from 'react-native-elements';
 
-import {AuthContext} from '../components/context';
+import {AuthContext} from '../navigation/AuthProvider';
 
 export function DrawerContent(props) {
-  const paperTheme = useTheme();
-
-  const {signOut, toggleTheme} = React.useContext(AuthContext);
+  const {user} = useContext(AuthContext);
+  const {logout} = React.useContext(AuthContext);
 
   return (
     <View style={{flex: 1}}>
       <DrawerContentScrollView {...props}>
         <View style={styles.drawerContent}>
           <View style={styles.userInfoSection}>
-            <View style={{flexDirection: 'row', marginTop: 15}}>
+            <View>
               <Avatar.Image
                 source={{
-                  uri: 'https://api.adorable.io/avatars/50/abott@adorable.png',
+                  uri:
+                    'https://image.freepik.com/free-vector/profile-icon-male-avatar-hipster-man-wear-headphones_48369-8728.jpg',
                 }}
-                size={50}
+                size={100}
               />
-              <View style={{marginLeft: 15, flexDirection: 'column'}}>
-                <Title style={styles.title}>John Doe</Title>
-                <Caption style={styles.caption}>@j_doe</Caption>
-              </View>
+            </View>
+            <View style={{marginLeft: 8}}>
+              <Title style={styles.title}>@{user.email.split('@')[0]}</Title>
+              <Caption style={styles.caption}>{user.email}</Caption>
             </View>
           </View>
 
@@ -78,19 +69,6 @@ export function DrawerContent(props) {
               }}
             />
           </Drawer.Section>
-          <Drawer.Section title="Preferences">
-            <TouchableRipple
-              onPress={() => {
-                toggleTheme();
-              }}>
-              <View style={styles.preference}>
-                <Text>Dark Theme</Text>
-                <View pointerEvents="none">
-                  <Switch value={paperTheme.dark} />
-                </View>
-              </View>
-            </TouchableRipple>
-          </Drawer.Section>
         </View>
       </DrawerContentScrollView>
       <Drawer.Section style={styles.bottomDrawerSection}>
@@ -100,7 +78,7 @@ export function DrawerContent(props) {
           )}
           label="Sign Out"
           onPress={() => {
-            signOut();
+            logout();
           }}
         />
       </Drawer.Section>
@@ -113,7 +91,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   userInfoSection: {
-    paddingLeft: 20,
+    marginTop: 16,
+    paddingLeft: 30,
   },
   title: {
     fontSize: 16,

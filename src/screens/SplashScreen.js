@@ -23,9 +23,9 @@ const SplashScreen = ({navigation}) => {
         <Animatable.Image
           animation="bounceIn"
           duraton="1500"
-          source={require('../assets/logo.png')}
+          source={require('../../assets/logo.png')}
           style={styles.logo}
-          resizeMode="stretch"
+          resizeMode="contain"
         />
         <Text style={{...styles.title, color: 'white', marginTop: 10}}>
           The Deep Music-Con
