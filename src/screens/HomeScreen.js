@@ -10,10 +10,15 @@ import {
   StatusBar,
   ScrollView,
   TouchableOpacity,
+  Linking,
+  Alert,
 } from 'react-native';
 import Modal from 'react-native-modal';
 import {Icon} from 'react-native-elements';
+import SoundPlayer from 'react-native-sound-player';
 import {useTheme} from '@react-navigation/native';
+
+import {getUrl} from '../storage/storage';
 
 const genre = [
   {
@@ -33,10 +38,26 @@ const genre = [
 const HomeScreen = ({navigation}) => {
   const theme = useTheme();
   const [isLoading, setIsLoading] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const [url, setUrl] = useState('');
 
-  const onPress = () => {
+  const callback = audioUrl => {
+    setIsLoading(false);
+    console.log('in call');
+    console.log('url:', audioUrl);
+    try {
+      SoundPlayer.loadUrl(url);
+    } catch {
+      e => console.log('Error', e);
+    }
+  };
+
+  const onPress = async () => {
     setIsLoading(true);
-    setTimeout(() => setIsLoading(false), 5000);
+    setIsVisible(true);
+    const audioUrl = await getUrl('classical/classical1.mid');
+    setUrl(audioUrl);
+    await setTimeout(() => callback(audioUrl), 5000);
   };
 
   return (
@@ -44,9 +65,8 @@ const HomeScreen = ({navigation}) => {
       showsVerticalScrollIndicator={false}
       contentContainerStyle={styles.container}>
       <StatusBar barStyle={theme.dark ? 'light-content' : 'dark-content'} />
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Choose any 1 Genre</Text>
-      </View>
+      <Text style={styles.headerTitle}>Pick a Genre</Text>
+      <View style={styles.header} />
       {genre.map((item, index) => {
         return (
           <TouchableOpacity
@@ -76,20 +96,30 @@ const HomeScreen = ({navigation}) => {
         );
       })}
       <Modal
-        isVisible={isLoading}
+        isVisible={isVisible}
         style={{alignItems: 'center', justifyContent: 'center'}}>
         <View style={styles.modalContainer}>
           <Text style={{fontSize: 20, fontWeight: '700'}}>
-            Generating Audio
+            {isLoading ? 'Generating Audio' : 'Enjoy!'}
           </Text>
-          <Text style={{fontSize: 16, fontWeight: '600', marginTop: 8}}>
-            Please wait...
-          </Text>
-          <ActivityIndicator
-            animating={isLoading}
-            size="large"
-            color="#00A699"
-          />
+          {isLoading ? (
+            <>
+              <Text style={{fontSize: 16, fontWeight: '600', marginTop: 8}}>
+                Please wait...
+              </Text>
+              <ActivityIndicator
+                animating={isLoading}
+                size="large"
+                color="#00A699"
+              />
+            </>
+          ) : (
+            <>
+              <View>
+                <Text>Hi</Text>
+              </View>
+            </>
+          )}
         </View>
       </Modal>
     </ScrollView>
@@ -104,17 +134,20 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
   header: {
-    width: '90%',
-    padding: 8,
-    marginVertical: 16,
-    alignItems: 'center',
-    borderWidth: 2,
-    borderRadius: 16,
-    borderColor: '#075E54',
+    width: '91%',
+    marginTop: 8,
+    marginBottom: 16,
+    borderWidth: 0.75,
+    alignSelf: 'center',
+    borderColor: '#075E5475',
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: '600',
+    marginTop: 16,
+    fontSize: 24,
+    paddingLeft: 18,
+    alignSelf: 'flex-start',
+    fontWeight: '700',
+    color: '#075E54',
   },
   cardContainer: {
     width: '75%',

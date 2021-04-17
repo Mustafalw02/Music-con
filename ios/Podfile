@@ -40,6 +40,10 @@ target 'rnv5' do
 
   pod 'react-native-safe-area-context', :path => '../node_modules/react-native-safe-area-context'
 
+  pod 'RNFBStorage', :path => '../node_modules/@react-native-firebase/storage'
+
+  pod 'RNSoundPlayer', :path => '../node_modules/react-native-sound-player'
+
   target 'rnv5Tests' do
     inherit! :search_paths
     # Pods for testing
